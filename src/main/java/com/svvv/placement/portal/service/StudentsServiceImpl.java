@@ -30,126 +30,126 @@ import jakarta.transaction.Transactional;
 @Service
 public class StudentsServiceImpl implements StudentsService {
 
-	private final StudentsRepository StudentsRepository;
-	private final StudentsMapper StudentsMapper;
+    private final StudentsRepository studentsRepository;
+    private final StudentsMapper studentsMapper;
 
-	@Autowired
-	public StudentsServiceImpl(StudentsRepository StudentsRepository, StudentsMapper StudentsMapper) {
-		this.StudentsRepository = StudentsRepository;
-		this.StudentsMapper = StudentsMapper;
-	}
+    @Autowired
+    public StudentsServiceImpl(StudentsRepository studentsRepository, StudentsMapper studentsMapper) {
+        this.studentsRepository = studentsRepository;
+        this.studentsMapper = studentsMapper;
+    }
 
-	@Override
-	@Transactional
-	public StudentsDTO createStudent(StudentsDTO StudentsDTO) {
-		// Generate UUID if not provided
-		if (StudentsDTO.getId() == null) {
-			StudentsDTO.setId(UUID.randomUUID());
-		}
+    @Override
+    @Transactional
+    public StudentsDTO createStudent(StudentsDTO studentsDTO) {
+        // Generate UUID if not provided
+        if (studentsDTO.getId() == null) {
+            studentsDTO.setId(UUID.randomUUID());
+        }
 
-		// Initialize profile completion status if not provided
-		if (StudentsDTO.getProfileCompletionStatus() == null) {
-			Map<String, Boolean> profileStatus = new HashMap<>();
-			profileStatus.put("personal", false);
-			profileStatus.put("academic", false);
-			profileStatus.put("skills", false);
-			profileStatus.put("links", false);
-			StudentsDTO.setProfileCompletionStatus(profileStatus);
-		}
+        // Initialize profile completion status if not provided
+        if (studentsDTO.getProfileCompletionStatus() == null) {
+            Map<String, Boolean> profileStatus = new HashMap<>();
+            profileStatus.put("personal", false);
+            profileStatus.put("academic", false);
+            profileStatus.put("skills", false);
+            profileStatus.put("links", false);
+            studentsDTO.setProfileCompletionStatus(profileStatus);
+        }
 
-		Students Students = StudentsMapper.toEntity(StudentsDTO);
-		Students savedStudents = StudentsRepository.save(Students);
-		return StudentsMapper.toDTO(savedStudents);
-	}
+        Students student = studentsMapper.toEntity(studentsDTO);
+        Students savedStudent = studentsRepository.save(student);
+        return studentsMapper.toDTO(savedStudent);
+    }
 
-	@Override
-	public StudentsDTO getStudentById(UUID id) {
-		Students Students = StudentsRepository.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("Students not found with id: " + id));
-		return StudentsMapper.toDTO(Students);
-	}
+    @Override
+    public StudentsDTO getStudentById(UUID id) {
+        Students student = studentsRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Student not found with id: " + id));
+        return studentsMapper.toDTO(student);
+    }
 
-	@Override
-	public StudentsDTO getStudentByEnrollmentNumber(String enrollmentNumber) {
-		Students Students = StudentsRepository.findByEnrollmentNumber(enrollmentNumber);
-		if (Students == null) {
-			throw new ResourceNotFoundException("Students not found with enrollment number: " + enrollmentNumber);
-		}
-		return StudentsMapper.toDTO(Students);
-	}
+    @Override
+    public StudentsDTO getStudentByEnrollmentNumber(String enrollmentNumber) {
+        Students student = studentsRepository.findByEnrollmentNumber(enrollmentNumber);
+        if (student == null) {
+            throw new ResourceNotFoundException("Student not found with enrollment number: " + enrollmentNumber);
+        }
+        return studentsMapper.toDTO(student);
+    }
 
-	@Override
-	public List<StudentsDTO> getAllStudents() {
-		List<Students> StudentsList = StudentsRepository.findAll();
-		return StudentsList.stream().map(StudentsMapper::toDTO).collect(Collectors.toList());
-	}
+    @Override
+    public List<StudentsDTO> getAllStudents() {
+        List<Students> studentsList = studentsRepository.findAll();
+        return studentsList.stream().map(studentsMapper::toDTO).collect(Collectors.toList());
+    }
 
-	@Override
-	@Transactional
-	public StudentsDTO updateStudent(UUID id, StudentsDTO StudentsDTO) {
-		Students Students = StudentsRepository.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("Students not found with id: " + id));
+    @Override
+    @Transactional
+    public StudentsDTO updateStudent(UUID id, StudentsDTO studentsDTO) {
+        Students student = studentsRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Student not found with id: " + id));
 
-		StudentsMapper.updateEntityFromDTO(StudentsDTO, Students);
-		Students updatedStudents = StudentsRepository.save(Students);
+        studentsMapper.updateEntityFromDTO(studentsDTO, student);
+        Students updatedStudent = studentsRepository.save(student);
 
-		return StudentsMapper.toDTO(updatedStudents);
-	}
+        return studentsMapper.toDTO(updatedStudent);
+    }
 
-	@Override
-	@Transactional
-	public void deleteStudent(UUID id) {
-		if (!StudentsRepository.existsById(id)) {
-			throw new ResourceNotFoundException("Students not found with id: " + id);
-		}
-		StudentsRepository.deleteById(id);
-	}
+    @Override
+    @Transactional
+    public void deleteStudent(UUID id) {
+        if (!studentsRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Student not found with id: " + id);
+        }
+        studentsRepository.deleteById(id);
+    }
 
-	@Override
-	public List<StudentsDTO> getStudentsByDepartment(String department) {
-		List<Students> StudentsList = StudentsRepository.findByDepartment(department);
-		return StudentsList.stream().map(StudentsMapper::toDTO).collect(Collectors.toList());
-	}
+    @Override
+    public List<StudentsDTO> getStudentsByDepartment(String department) {
+        List<Students> studentsList = studentsRepository.findByDepartment(department);
+        return studentsList.stream().map(studentsMapper::toDTO).collect(Collectors.toList());
+    }
 
-	@Override
-	public List<StudentsDTO> getStudentsByBatch(String batch) {
-		List<Students> StudentsList = StudentsRepository.findByBatch(batch);
-		return StudentsList.stream().map(StudentsMapper::toDTO).collect(Collectors.toList());
-	}
+    @Override
+    public List<StudentsDTO> getStudentsByBatch(String batch) {
+        List<Students> studentsList = studentsRepository.findByBatch(batch);
+        return studentsList.stream().map(studentsMapper::toDTO).collect(Collectors.toList());
+    }
 
-	@Override
-	public List<StudentsDTO> getEligibleStudentsWithMinCgpa(EligibilityStatus status, BigDecimal minCgpa) {
-		List<Students> StudentsList = StudentsRepository.findByEligibilityStatusAndCgpaGreaterThanEqual(status, minCgpa);
-		return StudentsList.stream().map(StudentsMapper::toDTO).collect(Collectors.toList());
-	}
+    @Override
+    public List<StudentsDTO> getEligibleStudentsWithMinCgpa(EligibilityStatus status, BigDecimal minCgpa) {
+        List<Students> studentsList = studentsRepository.findByEligibilityStatusAndCgpaGreaterThanEqual(status, minCgpa);
+        return studentsList.stream().map(studentsMapper::toDTO).collect(Collectors.toList());
+    }
 
-	@Override
-	public List<StudentsDTO> getStudentsByPlacementStatus(PlacementStatus placementStatus) {
-		List<Students> StudentsList = StudentsRepository.findByPlacementStatus(placementStatus);
-		return StudentsList.stream().map(StudentsMapper::toDTO).collect(Collectors.toList());
-	}
+    @Override
+    public List<StudentsDTO> getStudentsByPlacementStatus(PlacementStatus placementStatus) {
+        List<Students> studentsList = studentsRepository.findByPlacementStatus(placementStatus);
+        return studentsList.stream().map(studentsMapper::toDTO).collect(Collectors.toList());
+    }
 
-	@Override
-	public List<StudentsDTO> getEligibleStudentsForPlacement(Integer maxBacklogs, BigDecimal minCgpa) {
-		List<Students> StudentsList = StudentsRepository.findEligibleStudentsForPlacement(maxBacklogs, minCgpa);
-		return StudentsList.stream().map(StudentsMapper::toDTO).collect(Collectors.toList());
-	}
+    @Override
+    public List<StudentsDTO> getEligibleStudentsForPlacement(Integer maxBacklogs, BigDecimal minCgpa) {
+        List<Students> studentsList = studentsRepository.findEligibleStudentsForPlacement(maxBacklogs, minCgpa);
+        return studentsList.stream().map(studentsMapper::toDTO).collect(Collectors.toList());
+    }
 
-	@Override
-	@Transactional
-	public StudentsDTO updateProfileCompletionSection(UUID id, String section, boolean completed) {
-		Students Students = StudentsRepository.findById(id)
-				.orElseThrow(() -> new ResourceNotFoundException("Students not found with id: " + id));
+    @Override
+    @Transactional
+    public StudentsDTO updateProfileCompletionSection(UUID id, String section, boolean completed) {
+        Students student = studentsRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Student not found with id: " + id));
 
-		Map<String, Boolean> profileStatus = Students.getProfileCompletionStatus();
-		if (profileStatus == null) {
-			profileStatus = new HashMap<>();
-		}
+        Map<String, Boolean> profileStatus = student.getProfileCompletionStatus();
+        if (profileStatus == null) {
+            profileStatus = new HashMap<>();
+        }
 
-		profileStatus.put(section, completed);
-		Students.setProfileCompletionStatus(profileStatus);
+        profileStatus.put(section, completed);
+        student.setProfileCompletionStatus(profileStatus);
 
-		Students updatedStudents = StudentsRepository.save(Students);
-		return StudentsMapper.toDTO(updatedStudents);
-	}
+        Students updatedStudent = studentsRepository.save(student);
+        return studentsMapper.toDTO(updatedStudent);
+    }
 }

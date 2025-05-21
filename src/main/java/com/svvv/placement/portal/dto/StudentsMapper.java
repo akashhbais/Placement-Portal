@@ -3,12 +3,15 @@
  */
 package com.svvv.placement.portal.dto;
 
+import org.springframework.stereotype.Component;
+
 import com.svvv.placement.portal.model.Students;
 
 /**
  * @author Akash Bais
  *
  */
+@Component
 public class StudentsMapper {
     
     public StudentsDTO toDTO(Students student) {
